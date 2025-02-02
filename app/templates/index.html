@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rezerwacja Miejsc w Kinie</title>
+</head>
+<body>
+    <h1>Wybierz film i zarezerwuj miejsce</h1>
+
+    {% if message %}
+    <p style="color: red;">{{ message }}</p>
+    {% endif %}
+
+    <form method="post">
+        {% for movie, seats in seats.items() %}
+            <button type="submit" name="movie" value="{{ movie }}">
+                {{ movie }} (Dostępne miejsca: {{ seats }})
+            </button>
+        {% endfor %}
+    </form>
+</body>
+</html>
