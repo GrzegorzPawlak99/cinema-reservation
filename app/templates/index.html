@@ -51,14 +51,14 @@
         <!-- Powiadomienie toast -->
         <div id="toast-container"></div>
 
-        <form method="post">
+        <form id="reservation-form">
             <div class="row justify-content-center">
                 {% for movie, seats in seats.items() %}
                 <div class="col-md-4 mb-3">
                     <div class="card p-3 shadow-sm">
                         <h5 class="card-title">{{ movie }}</h5>
                         <p class="card-text">Dostępne miejsca: <strong id="seats-{{ movie }}">{{ seats }}</strong></p>
-                        <button type="submit" name="movie" value="{{ movie }}" 
+                        <button type="button" data-movie="{{ movie }}" 
                                 class="btn btn-primary w-100 reserve-btn" {% if seats == '0' %}disabled{% endif %}>
                             Rezerwuj
                         </button>
@@ -93,26 +93,24 @@
         }
 
         document.querySelectorAll(".reserve-btn").forEach(button => {
-            button.addEventListener("click", function(event) {
-                event.preventDefault();
-                let movie = this.getAttribute("value");
+            button.addEventListener("click", function() {
+                let movie = this.getAttribute("data-movie");
                 let seatsElement = document.getElementById("seats-" + movie);
                 let currentSeats = parseInt(seatsElement.textContent);
 
                 if (currentSeats > 0) {
                     this.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Rezerwuję...';
-                    seatsElement.textContent = currentSeats - 1;
-                    seatsElement.style.color = "red";
+                    this.disabled = true;
 
-                    setTimeout(() => {
-                        this.innerHTML = "Rezerwuj";
-                        seatsElement.style.color = "black";
-                        if (parseInt(seatsElement.textContent) === 0) {
-                            this.disabled = true;
-                        }
-                        showToast(`✅ Rezerwacja na ${movie} zakończona sukcesem!`);
-                        document.querySelector("form").submit();
-                    }, 1500);
+                    // Wysłanie żądania POST do serwera
+                    fetch("/", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                        body: "movie=" + encodeURIComponent(movie)
+                    }).then(response => response.text())
+                    .then(data => {
+                        document.body.innerHTML = data; // Odświeżenie strony dynamicznie
+                    });
                 }
             });
         });
