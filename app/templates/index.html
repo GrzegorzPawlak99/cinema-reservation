@@ -1,105 +1,33 @@
-<!DOCTYPE html>
-<html lang="pl">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rezerwacja Miejsc w Kinie</title>
-    
-    <!-- Bootstrap & Icons -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
+<script>
+    document.querySelectorAll("button").forEach(button => {
+        button.addEventListener("click", function(event) {
+            event.preventDefault(); // Zapobiegamy natychmiastowemu wysłaniu formularza
 
-    <style>
-        body {
-            background-color: #f8f9fa;
-        }
-        .container {
-            max-width: 800px;
-            margin-top: 50px;
-        }
-        .message {
-            font-weight: bold;
-            font-size: 18px;
-            padding: 10px;
-        }
-        .fade-out {
-            opacity: 1;
-            transition: opacity 2s ease-out;
-        }
-    </style>
-</head>
-<body>
+            let movie = this.getAttribute("value");
+            let seatsElement = document.getElementById("seats-" + movie);
+            let currentSeats = parseInt(seatsElement.textContent);
 
-    <div class="container text-center">
-        <h1 class="text-primary mb-4">
-            <i class="bi bi-camera-reels-fill"></i> Rezerwacja Miejsc w Kinie
-        </h1>
+            if (currentSeats > 0) {
+                this.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Rezerwuję...';
+                seatsElement.textContent = currentSeats - 1;
+                seatsElement.style.color = "red";
 
-        <!-- Powiadomienie po rezerwacji -->
-        {% if message %}
-        <div id="notification" class="alert alert-success text-center message fade-out">
-            {{ message }}
-        </div>
-        {% endif %}
-
-        <!-- Formularz rezerwacji -->
-        <form method="post">
-            <div class="row justify-content-center">
-                {% for movie, seats in seats.items() %}
-                <div class="col-md-4 mb-3">
-                    <div class="card p-3 shadow-sm">
-                        <h5 class="card-title">{{ movie }}</h5>
-                        <p class="card-text">Dostępne miejsca: <strong id="seats-{{ movie }}">{{ seats }}</strong></p>
-                        <button type="submit" name="movie" value="{{ movie }}" class="btn btn-primary w-100">
-                            Rezerwuj
-                        </button>
-                    </div>
-                </div>
-                {% endfor %}
-            </div>
-        </form>
-
-        <!-- Sekcja "O Kinie" -->
-        <div class="container text-center mt-5">
-            <h3 class="text-secondary">📽️ O naszym kinie</h3>
-            <p class="text-muted">Nasze kino oferuje najlepsze filmy i wygodne miejsca dla każdego! 🎬✨</p>
-        </div>
-    </div>
-
-    <!-- Bootstrap JavaScript -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-
-    <script>
-        // Usunięcie powiadomienia po 3 sekundach
-        setTimeout(() => {
-            const notification = document.getElementById("notification");
-            if (notification) {
-                notification.style.opacity = "0";
+                // Wysłanie formularza do serwera po 1.5 sekundy
+                setTimeout(() => {
+                    let form = document.createElement("form");
+                    form.method = "POST";
+                    form.action = "/";
+                    
+                    let input = document.createElement("input");
+                    input.type = "hidden";
+                    input.name = "movie";
+                    input.value = movie;
+                    
+                    form.appendChild(input);
+                    document.body.appendChild(form);
+                    form.submit();
+                }, 1500);
             }
-        }, 3000);
-
-        // Animacja po rezerwacji miejsca i dynamiczna aktualizacja liczby miejsc
-        document.querySelectorAll("button").forEach(button => {
-            button.addEventListener("click", function(event) {
-                event.preventDefault();
-                let movie = this.getAttribute("value");
-                let seatsElement = document.getElementById("seats-" + movie);
-                let currentSeats = parseInt(seatsElement.textContent);
-
-                if (currentSeats > 0) {
-                    this.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Rezerwuję...';
-                    seatsElement.textContent = currentSeats - 1;
-                    seatsElement.style.color = "red";
-
-                    setTimeout(() => {
-                        this.innerHTML = "Rezerwuj";
-                        seatsElement.style.color = "black";
-                        document.querySelector("form").submit();
-                    }, 1500);
-                }
-            });
         });
-    </script>
-
-</body>
-</html>
+    });
+</script>

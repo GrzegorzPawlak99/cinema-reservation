@@ -18,14 +18,17 @@ for movie in movies:
 def reserve():
     message = None
     if request.method == 'POST':
-        movie = request.form['movie']
-        seats_left = int(redis_client.get(movie))
+        movie = request.form.get('movie')  # Pobieramy poprawnie nazwę filmu
+        if movie and movie in movies:
+            seats_left = int(redis_client.get(movie))
 
-        if seats_left > 0:
-            redis_client.decr(movie)
-            message = f"✅ Zarezerwowano miejsce na {movie}!"
+            if seats_left > 0:
+                redis_client.decr(movie)
+                message = f"✅ Zarezerwowano miejsce na {movie}!"
+            else:
+                message = "❌ Brak miejsc!"
         else:
-            message = "❌ Brak miejsc!"
+            message = "❌ Wystąpił błąd! Spróbuj ponownie."
 
     return render_template('index.html', seats={m: redis_client.get(m) for m in movies}, message=message)
 
